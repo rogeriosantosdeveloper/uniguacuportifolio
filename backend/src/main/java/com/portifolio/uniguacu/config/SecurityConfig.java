@@ -52,9 +52,6 @@ public class SecurityConfig {
         return source;
     }
 
-    // ================== PONTO CRÍTICO AQUI ==================
-    // A anotação @Bean garante que o Spring use ESTA configuração
-    // de segurança, e não a padrão que bloqueia tudo.
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
@@ -62,22 +59,16 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        // Permite requisições de pre-flight (OPTIONS) para o CORS funcionar
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
-                        // Endpoints de autenticação são públicos
                         .requestMatchers("/api/auth/**").permitAll()
-
-                        // Endpoints GET para visualização de artefatos são públicos
                         .requestMatchers(HttpMethod.GET, "/api/artefatos", "/api/artefatos/**").permitAll()
-
-                        // Endpoints para servir arquivos de imagem são públicos
                         .requestMatchers(HttpMethod.GET, "/api/files/**").permitAll()
 
-                        // Endpoint para buscar o usuário logado é protegido
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        // ================== CORREÇÃO AQUI ==================
+                        // Adicionamos a regra para tornar a lista de alunos pública.
+                        .requestMatchers(HttpMethod.GET, "/api/users/alunos").permitAll()
 
-                        // Qualquer outra requisição exige autenticação
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
                         .anyRequest().authenticated()
                 );
 

@@ -30,5 +30,8 @@ public class Usuario {
 
     private String passwordResetToken;
 
+    private String role;
+
     private LocalDateTime passwordResetTokenExpiry;
+
 }

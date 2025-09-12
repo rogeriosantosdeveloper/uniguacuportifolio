@@ -4,6 +4,7 @@ import com.portifolio.uniguacu.model.Artefato;
 import com.portifolio.uniguacu.repository.ArtefatoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,12 +39,22 @@ public class ArtefatoController {
     }
 
     @PostMapping
-    public Artefato criarArtefato(@RequestBody Artefato artefato) {
-        return artefatoRepository.save(artefato);
+    public ResponseEntity<?> criarArtefato(@RequestBody Artefato artefato) {
+        // VALIDAÇÃO: Limita o semestre a no máximo 10.
+        if (artefato.getSemestre() != null && artefato.getSemestre() > 10) {
+            return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
+        }
+        Artefato novoArtefato = artefatoRepository.save(artefato);
+        return new ResponseEntity<>(novoArtefato, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Artefato> atualizarArtefato(@PathVariable Long id, @RequestBody Artefato artefatoDetalhes) {
+    public ResponseEntity<?> atualizarArtefato(@PathVariable Long id, @RequestBody Artefato artefatoDetalhes) {
+        // VALIDAÇÃO: Limita o semestre a no máximo 10.
+        if (artefatoDetalhes.getSemestre() != null && artefatoDetalhes.getSemestre() > 10) {
+            return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
+        }
+
         return artefatoRepository.findById(id)
                 .map(artefatoExistente -> {
                     artefatoExistente.setTitulo(artefatoDetalhes.getTitulo());

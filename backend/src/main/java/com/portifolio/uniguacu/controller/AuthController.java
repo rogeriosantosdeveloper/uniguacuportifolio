@@ -3,6 +3,7 @@ package com.portifolio.uniguacu.controller;
 import com.portifolio.uniguacu.dto.JwtAuthResponse;
 import com.portifolio.uniguacu.dto.LoginRequest;
 import com.portifolio.uniguacu.dto.RegisterRequest;
+import com.portifolio.uniguacu.dto.UsuarioDTO;
 import com.portifolio.uniguacu.model.Usuario;
 import com.portifolio.uniguacu.repository.UsuarioRepository;
 import com.portifolio.uniguacu.security.JwtTokenProvider;
@@ -62,21 +63,37 @@ public class AuthController {
         user.setCurso(registerRequest.getCurso());
         user.setTurno(registerRequest.getTurno());
 
-        usuarioRepository.save(user);
+        // CORREÇÃO: Garante que todo novo usuário seja um aluno.
+        user.setRole("ROLE_ALUNO");
 
-        return new ResponseEntity<>("Usuário registrado com sucesso!", HttpStatus.CREATED);
+        Usuario result = usuarioRepository.save(user);
+
+        return new ResponseEntity<>(convertToDto(result), HttpStatus.CREATED);
     }
 
+    // Este método é apenas um exemplo e não envia email de verdade.
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         return usuarioRepository.findByEmail(email)
                 .map(user -> {
                     String token = UUID.randomUUID().toString();
-                    // Aqui entraria a lógica de salvar o token no usuário e enviar o email
                     System.out.println("Token de reset para " + email + ": " + token);
-                    return ResponseEntity.ok("Um link para redefinição de senha foi enviado para o seu email.");
+                    return ResponseEntity.ok("Se o email existir, um link para redefinição de senha foi enviado.");
                 })
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Email não encontrado."));
+                .orElse(ResponseEntity.ok("Se o email existir, um link para redefinição de senha foi enviado."));
+    }
+
+    // Método auxiliar para converter Usuario em DTO e não expor a senha
+    private UsuarioDTO convertToDto(Usuario usuario) {
+        UsuarioDTO dto = new UsuarioDTO();
+        dto.setId(usuario.getId());
+        dto.setNomeCompleto(usuario.getNomeCompleto());
+        dto.setEmail(usuario.getEmail());
+        dto.setFotoUrl(usuario.getFotoUrl());
+        dto.setCurso(usuario.getCurso());
+        dto.setTurno(usuario.getTurno());
+        // Não inclua a senha no DTO
+        return dto;
     }
 }

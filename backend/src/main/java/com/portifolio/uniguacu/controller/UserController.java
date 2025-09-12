@@ -58,6 +58,27 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    // CORREÇÃO: Endpoint específico para buscar apenas alunos.
+    @GetMapping("/alunos")
+    public ResponseEntity<List<UsuarioDTO>> getAllAlunos() {
+        List<Usuario> usuarios = usuarioRepository.findAllByRole("ROLE_ALUNO"); // Busca por role
+        List<UsuarioDTO> dtos = usuarios.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    // Este método agora pode ser usado para fins administrativos, se necessário.
+    @GetMapping
+    public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
+        List<Usuario> usuarios = usuarioRepository.findAll();
+        List<UsuarioDTO> dtos = usuarios.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+
+    // Método auxiliar para não expor dados sensíveis como a senha.
     private UsuarioDTO convertToDto(Usuario usuario) {
         UsuarioDTO dto = new UsuarioDTO();
         dto.setId(usuario.getId());
@@ -67,14 +88,5 @@ public class UserController {
         dto.setCurso(usuario.getCurso());
         dto.setTurno(usuario.getTurno());
         return dto;
-    }
-
-    @GetMapping
-    public ResponseEntity<List<UsuarioDTO>> getAllUsers() {
-        List<Usuario> usuarios = usuarioRepository.findAll();
-        List<UsuarioDTO> dtos = usuarios.stream()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
     }
 }
