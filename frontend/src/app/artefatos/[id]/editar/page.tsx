@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext'; // Hook para autenticação
 
-// Tipo para o formulário
 type ArtefatoFormData = {
   titulo: string;
   autor: string;
@@ -91,8 +90,6 @@ export default function EditarArtefatoPage() {
       <Link href={`/artefatos/${id}`} className="text-blue-500 hover:underline mb-6 block">&larr; Cancelar e Voltar</Link>
       <h1 className="text-3xl font-bold mb-6">Editar Projeto</h1>
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md">
-        {/* Adicione todos os campos do seu formulário aqui, similar à página de criação */}
-        {/* Exemplo para o campo Título */}
         <div className="mb-4">
           <label htmlFor="titulo" className="block text-gray-700 font-bold mb-2">Título</label>
           <input
@@ -105,8 +102,6 @@ export default function EditarArtefatoPage() {
             required
           />
         </div>
-        
-        {/* ... adicione os outros campos (autor, descricao, curso, etc.) ... */}
 
         <button type="submit" className="bg-uniguacu-blue hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded">
           Salvar Alterações

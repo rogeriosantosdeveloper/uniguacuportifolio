@@ -62,8 +62,6 @@ public class AuthController {
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
         user.setCurso(registerRequest.getCurso());
         user.setTurno(registerRequest.getTurno());
-
-        // CORREÇÃO: Garante que todo novo usuário seja um aluno.
         user.setRole("ROLE_ALUNO");
 
         Usuario result = usuarioRepository.save(user);
@@ -71,20 +69,30 @@ public class AuthController {
         return new ResponseEntity<>(convertToDto(result), HttpStatus.CREATED);
     }
 
-    // Este método é apenas um exemplo e não envia email de verdade.
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
         return usuarioRepository.findByEmail(email)
                 .map(user -> {
                     String token = UUID.randomUUID().toString();
-                    System.out.println("Token de reset para " + email + ": " + token);
-                    return ResponseEntity.ok("Se o email existir, um link para redefinição de senha foi enviado.");
+                    // Lógica para salvar o token e a data de expiração no usuário (não implementado)
+                    // user.setPasswordResetToken(token);
+                    // user.setPasswordResetTokenExpiry(LocalDateTime.now().plusHours(1));
+                    // usuarioRepository.save(user);
+
+                    // Lógica para enviar o email com o link de reset (não implementado)
+                    // emailService.sendPasswordResetEmail(user, token);
+
+                    // ================== CORREÇÃO AQUI ==================
+                    // A linha que imprimia o token no console foi removida.
+                    // System.out.println("Token de reset para " + email + ": " + token);
+
+                    // Retornamos uma mensagem genérica por segurança.
+                    return ResponseEntity.ok("Se um usuário com este email existir, um link para redefinição de senha foi enviado.");
                 })
-                .orElse(ResponseEntity.ok("Se o email existir, um link para redefinição de senha foi enviado."));
+                .orElse(ResponseEntity.ok("Se um usuário com este email existir, um link para redefinição de senha foi enviado."));
     }
 
-    // Método auxiliar para converter Usuario em DTO e não expor a senha
     private UsuarioDTO convertToDto(Usuario usuario) {
         UsuarioDTO dto = new UsuarioDTO();
         dto.setId(usuario.getId());
@@ -93,7 +101,6 @@ public class AuthController {
         dto.setFotoUrl(usuario.getFotoUrl());
         dto.setCurso(usuario.getCurso());
         dto.setTurno(usuario.getTurno());
-        // Não inclua a senha no DTO
         return dto;
     }
 }

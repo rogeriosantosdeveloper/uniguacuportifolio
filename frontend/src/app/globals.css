@@ -3,14 +3,12 @@
 @tailwind utilities;
 
 @layer base {
-  /* Estilos base para os links, agora com as cores da marca */
   a {
     @apply text-uniguacu-blue hover:text-uniguacu-red transition-colors duration-200;
   }
 }
 
 @layer components {
-  /* Sua classe customizada para os filtros, agora funcional */
   .filter-select {
     @apply block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-uniguacu-blue focus:border-uniguacu-blue sm:text-sm;
   }

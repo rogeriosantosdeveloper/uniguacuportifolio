@@ -9,17 +9,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Novo estado para feedback
+  const [isSubmitting, setIsSubmitting] = useState(false); 
   const { login } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setIsSubmitting(true); // Inicia o carregamento
+    setIsSubmitting(true);
 
     try {
-      console.log('Enviando para o backend:', { email, password }); // Pista 1: Ver se a função é chamada
 
       const response = await fetch('http://localhost:8080/api/auth/login', {
         method: 'POST',
@@ -27,22 +26,19 @@ export default function LoginPage() {
         body: JSON.stringify({ email, password }),
       });
 
-      console.log('Resposta do backend recebida. Status:', response.status); // Pista 2: Ver o status da resposta
-
       if (!response.ok) {
-        // Se a resposta não for OK, tentamos ler a mensagem de erro do backend
+        // Se a resposta não for OK, tenta ler a mensagem de erro do backend
         const errorData = await response.json().catch(() => ({ message: 'Credenciais inválidas ou erro no servidor.' }));
         throw new Error(errorData.message || 'Credenciais inválidas.');
       }
 
       const data = await response.json();
-      console.log('Login bem-sucedido, token recebido:', data.accessToken); // Pista 3: Ver o token
       
       login(data.accessToken);
       router.push('/');
       
     } catch (err: unknown) {
-      console.error('Erro durante o login:', err); // Pista 4: Logar o erro completo
+      console.error('Erro durante o login:', err); //Logar o erro completo
       if (err instanceof Error) {
         setError(err.message);
       } else {

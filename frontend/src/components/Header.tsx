@@ -21,7 +21,6 @@ export function Header() {
         </Link>
         <div className="flex items-center gap-4">
           {isAuthenticated && user ? (
-            // Se o usuário ESTÁ logado
             <>
               <Link href="/artefatos/novo" className="bg-uniguacu-blue hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded transition-all duration-300">
                 + Adicionar Projeto
@@ -29,14 +28,28 @@ export function Header() {
               
               {/* Menu do Usuário */}
               <div className="flex items-center gap-3">
-                 <span className="font-semibold text-gray-700 hidden sm:block">{user.nomeCompleto}</span>
-                 <Link href="/perfil"> {/* Link para a futura página de perfil */}
-                     <img
-                         src={user.fotoUrl ? `http://localhost:8080/api/files/${user.fotoUrl}` : '/avatar-placeholder.png'}
-                         alt={`Foto de ${user.nomeCompleto}`}
-                         className="w-10 h-10 rounded-full object-cover border-2 border-uniguacu-blue cursor-pointer"
-                     />
-                 </Link>
+                  <span className="font-semibold text-gray-700 hidden sm:block">{user.nomeCompleto}</span>
+                  
+                  {/* ======================= AJUSTE DO AVATAR AQUI ======================= */}
+                  <Link href="/perfil" className="cursor-pointer">
+                    <div className="w-10 h-10 rounded-full bg-uniguacu-blue/10 flex items-center justify-center relative overflow-hidden border-2 border-uniguacu-blue">
+                      {user.fotoUrl ? (
+                        // Se o usuário TEM foto, exibe a imagem
+                        <Image
+                          src={`http://localhost:8080/api/files/${user.fotoUrl}`}
+                          alt={`Foto de ${user.nomeCompleto}`}
+                          layout="fill"
+                          objectFit="cover"
+                        />
+                      ) : (
+                        // Se NÃO tem foto, exibe a inicial
+                        <span className="text-lg font-bold text-uniguacu-blue">
+                          {user.nomeCompleto.charAt(0).toUpperCase()}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                  {/* =================================================================== */}
               </div>
 
               <button onClick={logout} className="text-uniguacu-red font-semibold hover:underline">
@@ -44,10 +57,9 @@ export function Header() {
               </button>
             </>
           ) : (
-            // Se o usuário NÃO ESTÁ logado
             <>
               <Link href="/login">Fazer Login</Link>
-              <Link href="/cadastro" className="bg-uniguacu-red hover:bg-opacity-80 text-white font-bold py-2 px-4 rounded-md">
+              <Link href="/cadastro" className="bg-uniguacu-red hover:text-uniguacu-blue mb-6-80 text-white font-bold py-2 px-4 rounded-md">
                 Cadastre-se
               </Link>
             </>

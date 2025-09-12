@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext'; // Hook para autenticação
 
-// Tipo para o objeto Artefato
 type Artefato = {
   id: number;
   titulo: string;
@@ -20,7 +19,7 @@ export default function ArtefatoDetalhePage() {
   const router = useRouter();
   const id = params.id;
   
-  // Usando nosso AuthContext para pegar o status de login e o token
+  // Usando AuthContext para pegar o status de login e o token
   const { isAuthenticated, token } = useAuth();
 
   const [artefato, setArtefato] = useState<Artefato | null>(null);
@@ -89,7 +88,6 @@ export default function ArtefatoDetalhePage() {
             </div>
             <hr className="my-8" />
 
-            {/* A SEÇÃO DE AÇÕES SÓ É EXIBIDA SE O USUÁRIO ESTIVER LOGADO */}
             {isAuthenticated && (
               <div className="flex items-center gap-4">
                 <button

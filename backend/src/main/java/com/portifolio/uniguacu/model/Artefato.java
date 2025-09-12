@@ -12,20 +12,23 @@ public class Artefato {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(columnDefinition = "TEXT") // Instrução explícita para forçar o tipo TEXTO
+    @Column(columnDefinition = "TEXT")
     private String titulo;
 
-    @Column(columnDefinition = "TEXT") // Instrução explícita para forçar o tipo TEXTO
+    @Column(columnDefinition = "TEXT")
     private String descricao;
 
     private String urlImagem;
 
-    @Column(columnDefinition = "TEXT") // Instrução explícita para forçar o tipo TEXTO
+    @Column(columnDefinition = "TEXT")
     private String autor;
 
     private String curso;
     private String campus;
     private String categoria;
     private Integer semestre;
-    private LocalDate dataCriacao;
+
+    // ================== CORREÇÃO AQUI ==================
+    private LocalDate dataInicial; // Renomeado de dataCriacao para mais clareza
+    private LocalDate dataFinal;   // Novo campo para a data de término
 }

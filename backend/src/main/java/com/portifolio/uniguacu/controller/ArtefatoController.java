@@ -65,7 +65,12 @@ public class ArtefatoController {
                     artefatoExistente.setCampus(artefatoDetalhes.getCampus());
                     artefatoExistente.setCategoria(artefatoDetalhes.getCategoria());
                     artefatoExistente.setSemestre(artefatoDetalhes.getSemestre());
-                    artefatoExistente.setDataCriacao(artefatoDetalhes.getDataCriacao());
+
+                    // ================== CORREÇÃO AQUI ==================
+                    // Trocamos o campo 'dataCriacao' pelos novos campos 'dataInicial' e 'dataFinal'.
+                    artefatoExistente.setDataInicial(artefatoDetalhes.getDataInicial());
+                    artefatoExistente.setDataFinal(artefatoDetalhes.getDataFinal());
+                    // ====================================================
 
                     Artefato atualizado = artefatoRepository.save(artefatoExistente);
                     return ResponseEntity.ok(atualizado);

@@ -3,13 +3,13 @@
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import useSWR from 'swr';
-import Image from 'next/image'; // Importe o componente de Imagem
+import Image from 'next/image';
 
 import { SearchAndFilter } from '@/components/SearchAndFilter';
 import { Tabs } from '@/components/Tabs';
 import { AlunoList } from '@/components/AlunoList';
 
-// Tipos para nossos dados
+
 type Artefato = {
   id: number;
   titulo: string;
@@ -79,7 +79,7 @@ export default function Home() {
       {/* IMAGEM DO BANNER ADICIONADA AQUI */}
       <div className="w-full mb-8">
         <Image
-          src="/banner-uniguacu.jpg" // Nome do arquivo na pasta /public
+          src="/banner-uniguacu.jpg"
           alt="Faculdade Uniguaçu - Nota máxima no MEC"
           width={1920}
           height={640}
@@ -88,7 +88,7 @@ export default function Home() {
         />
       </div>
 
-      {/* ABAS MOVIDAS PARA BAIXO DA IMAGEM */}
+      {/* ABAS PARA BAIXO DA IMAGEM */}
       <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="container mx-auto px-4 py-8">
@@ -135,8 +135,6 @@ export default function Home() {
         )}
 
         {activeTab === 'alunos' && (
-          // Ação Importante: Certifique-se que este componente busca os dados
-          // do novo endpoint: /api/users/alunos
           <AlunoList />
         )}
       </div>

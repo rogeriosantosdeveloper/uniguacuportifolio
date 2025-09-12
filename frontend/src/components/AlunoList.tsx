@@ -12,8 +12,6 @@ type Aluno = {
   turno: string;
 };
 
-// CORREÇÃO 1: Simplificamos o 'fetcher' novamente, pois a rota agora é pública
-// e não precisa mais de autenticação.
 const fetcher = async (url: string) => {
   const res = await fetch(url);
   if (!res.ok) {
@@ -42,7 +40,6 @@ export const AlunoList = () => {
       {alunos.map((aluno) => (
         <div key={aluno.id} className="border rounded-lg shadow-lg bg-white p-5 text-center flex flex-col items-center transition-transform duration-300 hover:scale-105">
           
-          {/* CORREÇÃO 2: Lógica do Avatar (Foto ou Inicial do Nome) */}
           <div className="w-24 h-24 rounded-full overflow-hidden mb-4 relative bg-uniguacu-blue/10 flex items-center justify-center">
             {aluno.fotoUrl ? (
               // Se tiver foto, mostra a imagem

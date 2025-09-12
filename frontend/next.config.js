@@ -1,7 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Suas configurações do Next.js, como reactStrictMode, podem vir aqui.
-  // Por enquanto, podemos deixar vazio se não houver nada customizado.
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/api/files/**', // Opcional, mas recomendado por segurança
+      },
+    ],
+  },
 };
 
 module.exports = nextConfig;
