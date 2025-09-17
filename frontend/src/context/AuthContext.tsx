@@ -4,6 +4,7 @@ import React, { createContext, useState, useContext, useEffect, ReactNode } from
 
 // 1. Definimos um tipo para o objeto do usuário
 interface User {
+  role: string;
   id: number;
   nomeCompleto: string;
   email: string;

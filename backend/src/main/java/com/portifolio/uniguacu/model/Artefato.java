@@ -6,6 +6,7 @@ import java.time.LocalDate;
 
 @Entity
 @Data
+@Table(name="artefato") // É uma boa prática definir o nome da tabela explicitamente
 public class Artefato {
 
     @Id
@@ -28,7 +29,10 @@ public class Artefato {
     private String categoria;
     private Integer semestre;
 
-    // ================== CORREÇÃO AQUI ==================
-    private LocalDate dataInicial; // Renomeado de dataCriacao para mais clareza
-    private LocalDate dataFinal;   // Novo campo para a data de término
+    // CORREÇÃO: Padronizando os nomes dos campos de data
+    private LocalDate dataInicial;
+    private LocalDate dataFinal;
+
+    @Enumerated(EnumType.STRING)
+    private StatusProjeto status;
 }

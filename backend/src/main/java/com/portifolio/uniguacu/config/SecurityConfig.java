@@ -59,16 +59,25 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/artefatos", "/api/artefatos/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/files/**").permitAll()
+                        // --- REGRAS PÚBLICAS ---
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permite requisições pre-flight do CORS
+                        .requestMatchers("/api/auth/**").permitAll() // Permite login e registro
+                        .requestMatchers(HttpMethod.GET, "/api/artefatos", "/api/artefatos/**").permitAll() // Permite ver projetos
+                        .requestMatchers(HttpMethod.GET, "/api/users/alunos").permitAll() // Permite ver lista de alunos
+                        .requestMatchers(HttpMethod.GET, "/api/files/**").permitAll() // Permite ver imagens
 
-                        // ================== CORREÇÃO AQUI ==================
-                        // Adicionamos a regra para tornar a lista de alunos pública.
-                        .requestMatchers(HttpMethod.GET, "/api/users/alunos").permitAll()
+                        // --- REGRAS DE USUÁRIO LOGADO ---
+                        .requestMatchers(HttpMethod.POST, "/api/artefatos").authenticated() // Usuário logado pode criar projeto
+                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated() // Usuário logado pode ver seu perfil
 
-                        .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        // --- REGRAS DE ADMIN ---
+                        .requestMatchers("/api/artefatos/pendentes").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/artefatos/{id}/aprovar").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/artefatos/{id}/reprovar").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/artefatos/{id}").hasRole("ADMIN") // Apenas admin edita
+                        .requestMatchers(HttpMethod.DELETE, "/api/artefatos/{id}").hasRole("ADMIN") // Apenas admin deleta
+
+                        // Qualquer outra requisição precisa de autenticação
                         .anyRequest().authenticated()
                 );
 

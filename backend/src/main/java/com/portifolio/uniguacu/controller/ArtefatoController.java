@@ -1,6 +1,7 @@
 package com.portifolio.uniguacu.controller;
 
 import com.portifolio.uniguacu.model.Artefato;
+import com.portifolio.uniguacu.model.StatusProjeto;
 import com.portifolio.uniguacu.repository.ArtefatoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,17 +41,16 @@ public class ArtefatoController {
 
     @PostMapping
     public ResponseEntity<?> criarArtefato(@RequestBody Artefato artefato) {
-        // VALIDAÇÃO: Limita o semestre a no máximo 10.
         if (artefato.getSemestre() != null && artefato.getSemestre() > 10) {
             return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
         }
+        artefato.setStatus(StatusProjeto.PENDENTE);
         Artefato novoArtefato = artefatoRepository.save(artefato);
         return new ResponseEntity<>(novoArtefato, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizarArtefato(@PathVariable Long id, @RequestBody Artefato artefatoDetalhes) {
-        // VALIDAÇÃO: Limita o semestre a no máximo 10.
         if (artefatoDetalhes.getSemestre() != null && artefatoDetalhes.getSemestre() > 10) {
             return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
         }
@@ -66,11 +66,9 @@ public class ArtefatoController {
                     artefatoExistente.setCategoria(artefatoDetalhes.getCategoria());
                     artefatoExistente.setSemestre(artefatoDetalhes.getSemestre());
 
-                    // ================== CORREÇÃO AQUI ==================
-                    // Trocamos o campo 'dataCriacao' pelos novos campos 'dataInicial' e 'dataFinal'.
+                    // CORREÇÃO: Usando os nomes de campo padronizados
                     artefatoExistente.setDataInicial(artefatoDetalhes.getDataInicial());
                     artefatoExistente.setDataFinal(artefatoDetalhes.getDataFinal());
-                    // ====================================================
 
                     Artefato atualizado = artefatoRepository.save(artefatoExistente);
                     return ResponseEntity.ok(atualizado);
@@ -84,6 +82,33 @@ public class ArtefatoController {
                 .map(artefato -> {
                     artefatoRepository.deleteById(id);
                     return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- Endpoints de Administração ---
+
+    @GetMapping("/pendentes")
+    public ResponseEntity<List<Artefato>> listarProjetosPendentes() {
+        return ResponseEntity.ok(artefatoRepository.findByStatus(StatusProjeto.PENDENTE));
+    }
+
+    @PutMapping("/{id}/aprovar")
+    public ResponseEntity<Artefato> aprovarProjeto(@PathVariable Long id) {
+        return artefatoRepository.findById(id)
+                .map(artefato -> {
+                    artefato.setStatus(StatusProjeto.APROVADO);
+                    return ResponseEntity.ok(artefatoRepository.save(artefato));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/reprovar")
+    public ResponseEntity<Artefato> reprovarProjeto(@PathVariable Long id) {
+        return artefatoRepository.findById(id)
+                .map(artefato -> {
+                    artefato.setStatus(StatusProjeto.REPROVADO);
+                    return ResponseEntity.ok(artefatoRepository.save(artefato));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
