@@ -41,11 +41,21 @@ public class DatabaseConfig {
                     String password = userPass.length > 1 ? userPass[1] : "";
                     
                     String host = dbUri.getHost();
+                    // Se não tiver porta na URL, usa a padrão do PostgreSQL (5432)
                     int port = dbUri.getPort() > 0 ? dbUri.getPort() : 5432;
                     String path = dbUri.getPath();
                     String dbName = path.startsWith("/") ? path.substring(1) : path;
                     
+                    // Monta a URL JDBC
                     String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, port, dbName);
+                    
+                    System.out.println("=== Configuração do Banco de Dados ===");
+                    System.out.println("Host: " + host);
+                    System.out.println("Port: " + port);
+                    System.out.println("Database: " + dbName);
+                    System.out.println("Username: " + username);
+                    System.out.println("JDBC URL: " + jdbcUrl.replace(password, "***"));
+                    System.out.println("=====================================");
                     
                     return DataSourceBuilder.create()
                             .url(jdbcUrl)
