@@ -1,48 +1,38 @@
 # Configuração de Variáveis de Ambiente
 
-Este projeto precisa de uma variável de ambiente para se conectar ao backend.
+## Problema: ERR_CONNECTION_REFUSED
 
-## Configuração para Desenvolvimento Local
+O erro `ERR_CONNECTION_REFUSED` ocorre porque a variável de ambiente `NEXT_PUBLIC_API_URL` não está configurada, então o frontend tenta se conectar ao `localhost:8080` que não está disponível.
 
-1. Crie um arquivo `.env.local` na raiz do projeto (mesmo nível do `package.json`)
-2. Adicione a seguinte linha:
+## Solução
+
+### Para Desenvolvimento Local
+
+Crie um arquivo `.env.local` na pasta `frontend/` com o seguinte conteúdo:
 
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:8080
 ```
 
-## Configuração para Produção (Vercel/Render)
+### Para Produção (Vercel)
 
-### No Vercel
+No painel do Vercel:
 
-1. Acesse o dashboard do seu projeto no Vercel
-2. Vá em **Settings** > **Environment Variables**
-3. Adicione uma nova variável:
+1. Vá em **Settings** → **Environment Variables**
+2. Adicione uma nova variável:
    - **Name**: `NEXT_PUBLIC_API_URL`
-   - **Value**: A URL do seu backend no Render (ex: `https://seu-backend.onrender.com`)
-   - **Environments**: Selecione Production, Preview e Development
-4. Faça um novo deploy para que as variáveis sejam aplicadas
+   - **Value**: URL do seu backend (ex: `https://seu-backend.onrender.com`)
+   - **Environments**: Marque todas (Production, Preview, Development)
+3. Salve e faça um novo deploy
 
-### No Render (se necessário)
+### Exemplo de Valores
 
-Se você precisar definir variáveis de ambiente no Render também, acesse:
-- Seu serviço no Render
-- Vá em **Environment**
-- Adicione a variável `NEXT_PUBLIC_API_URL` com o valor da URL do backend
-
-## Verificação
-
-Para verificar se a variável está configurada corretamente:
-
-1. No código, a função `getApiUrl()` em `src/lib/api.ts` usa:
-   - A variável de ambiente `NEXT_PUBLIC_API_URL` se estiver definida
-   - Caso contrário, usa `http://localhost:8080` como fallback
-
-2. No console do navegador (após o build), você pode verificar qual URL está sendo usada
+- **Desenvolvimento local**: `http://localhost:8080`
+- **Backend no Render**: `https://seu-backend.onrender.com`
+- **Backend no Vercel**: `https://seu-backend.vercel.app`
 
 ## Importante
 
-- O prefixo `NEXT_PUBLIC_` é necessário para que a variável seja acessível no cliente (browser)
-- Sem essa variável configurada em produção, o frontend tentará se conectar ao localhost, causando erros 404
-- Após alterar variáveis de ambiente no Vercel, você precisa fazer um novo deploy
-
+- O prefixo `NEXT_PUBLIC_` é obrigatório para expor a variável no cliente no Next.js
+- Após criar/modificar o `.env.local`, reinicie o servidor de desenvolvimento (`npm run dev`)
+- O arquivo `.env.local` não deve ser commitado no Git (já está no `.gitignore`)
