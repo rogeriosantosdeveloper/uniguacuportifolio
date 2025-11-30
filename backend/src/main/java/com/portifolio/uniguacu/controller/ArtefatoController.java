@@ -1,13 +1,14 @@
 package com.portifolio.uniguacu.controller;
 
 import com.portifolio.uniguacu.model.Artefato;
-import com.portifolio.uniguacu.model.StatusProjeto;
+import com.portifolio.uniguacu.model.StatusProjeto; // Importa o Enum
 import com.portifolio.uniguacu.repository.ArtefatoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,8 +20,9 @@ public class ArtefatoController {
     @Autowired
     private ArtefatoRepository artefatoRepository;
 
+    // Lista apenas projetos APROVADOS para a visão pública (Home)
     @GetMapping
-    public List<Artefato> listarTodos(
+    public List<Artefato> listarAprovados(
             @RequestParam(required = false) String busca,
             @RequestParam(required = false) String curso,
             @RequestParam(required = false) String campus,
@@ -29,9 +31,14 @@ public class ArtefatoController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataInicial,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataFinal
     ) {
-        return artefatoRepository.search(busca, curso, campus, categoria, semestre, dataInicial, dataFinal);
+        // CORREÇÃO: Chama o método 'searchByStatus' e passa o Enum APROVADO como String
+        return artefatoRepository.searchByStatus(
+                StatusProjeto.APROVADO.name(),
+                busca, curso, campus, categoria, semestre, dataInicial, dataFinal
+        );
     }
 
+    // Busca um artefato específico pelo ID (para a página de detalhes)
     @GetMapping("/{id}")
     public ResponseEntity<Artefato> buscarPorId(@PathVariable Long id) {
         return artefatoRepository.findById(id)
@@ -39,36 +46,40 @@ public class ArtefatoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Cria um novo artefato com status PENDENTE
     @PostMapping
-    public ResponseEntity<?> criarArtefato(@RequestBody Artefato artefato) {
-        if (artefato.getSemestre() != null && artefato.getSemestre() > 10) {
-            return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
+    public ResponseEntity<Artefato> criarArtefato(@RequestBody Artefato artefato) {
+        if (artefato.getDataCriacao() == null) {
+            artefato.setDataCriacao(LocalDate.now());
         }
-        artefato.setStatus(StatusProjeto.PENDENTE);
-        Artefato novoArtefato = artefatoRepository.save(artefato);
-        return new ResponseEntity<>(novoArtefato, HttpStatus.CREATED);
+        artefato.setStatus(StatusProjeto.PENDENTE); // Define o status usando o Enum
+        Artefato savedArtefato = artefatoRepository.save(artefato);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedArtefato);
     }
 
+    // Atualiza um artefato (usado pelo Admin na página de edição)
     @PutMapping("/{id}")
-    public ResponseEntity<?> atualizarArtefato(@PathVariable Long id, @RequestBody Artefato artefatoDetalhes) {
-        if (artefatoDetalhes.getSemestre() != null && artefatoDetalhes.getSemestre() > 10) {
-            return ResponseEntity.badRequest().body("O semestre não pode ser maior que 10.");
-        }
-
+    public ResponseEntity<Artefato> atualizarArtefato(@PathVariable Long id, @RequestBody Artefato artefatoDetalhes) {
         return artefatoRepository.findById(id)
                 .map(artefatoExistente -> {
+                    // Atualiza os campos básicos
                     artefatoExistente.setTitulo(artefatoDetalhes.getTitulo());
                     artefatoExistente.setDescricao(artefatoDetalhes.getDescricao());
                     artefatoExistente.setAutor(artefatoDetalhes.getAutor());
-                    artefatoExistente.setUrlImagem(artefatoDetalhes.getUrlImagem());
+
+                    // Atualiza os novos campos de mídia
+                    artefatoExistente.setUrlImagemPrincipal(artefatoDetalhes.getUrlImagemPrincipal());
+                    artefatoExistente.setListaImagens(artefatoDetalhes.getListaImagens());
+                    artefatoExistente.setListaDocumentos(artefatoDetalhes.getListaDocumentos());
+                    artefatoExistente.setVideoYoutubeUrl(artefatoDetalhes.getVideoYoutubeUrl());
+
+                    // Atualiza os campos de filtro
                     artefatoExistente.setCurso(artefatoDetalhes.getCurso());
                     artefatoExistente.setCampus(artefatoDetalhes.getCampus());
                     artefatoExistente.setCategoria(artefatoDetalhes.getCategoria());
                     artefatoExistente.setSemestre(artefatoDetalhes.getSemestre());
 
-                    // CORREÇÃO: Usando os nomes de campo padronizados
-                    artefatoExistente.setDataInicial(artefatoDetalhes.getDataInicial());
-                    artefatoExistente.setDataFinal(artefatoDetalhes.getDataFinal());
+                    // IMPORTANTE: O status NÃO é atualizado aqui
 
                     Artefato atualizado = artefatoRepository.save(artefatoExistente);
                     return ResponseEntity.ok(atualizado);
@@ -76,6 +87,7 @@ public class ArtefatoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Deleta um artefato (usado pelo Admin)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletarArtefato(@PathVariable Long id) {
         return artefatoRepository.findById(id)
@@ -86,29 +98,27 @@ public class ArtefatoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // --- Endpoints de Administração ---
+    // --- ENDPOINTS PARA ADMIN ---
 
+    // Lista projetos PENDENTES (para um painel de admin futuro)
     @GetMapping("/pendentes")
-    public ResponseEntity<List<Artefato>> listarProjetosPendentes() {
-        return ResponseEntity.ok(artefatoRepository.findByStatus(StatusProjeto.PENDENTE));
+    // @PreAuthorize("hasRole('ADMIN')")
+    public List<Artefato> listarPendentes() {
+        return artefatoRepository.findByStatus(StatusProjeto.PENDENTE); // Usa o Enum
     }
 
+    // Endpoint para APROVAR um projeto (usado pelo Admin)
     @PutMapping("/{id}/aprovar")
-    public ResponseEntity<Artefato> aprovarProjeto(@PathVariable Long id) {
+    // @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Artefato> aprovarArtefato(@PathVariable Long id) {
         return artefatoRepository.findById(id)
                 .map(artefato -> {
-                    artefato.setStatus(StatusProjeto.APROVADO);
-                    return ResponseEntity.ok(artefatoRepository.save(artefato));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/{id}/reprovar")
-    public ResponseEntity<Artefato> reprovarProjeto(@PathVariable Long id) {
-        return artefatoRepository.findById(id)
-                .map(artefato -> {
-                    artefato.setStatus(StatusProjeto.REPROVADO);
-                    return ResponseEntity.ok(artefatoRepository.save(artefato));
+                    if (artefato.getStatus() != StatusProjeto.PENDENTE) { // Compara com Enum
+                        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Projeto não está pendente para aprovação.");
+                    }
+                    artefato.setStatus(StatusProjeto.APROVADO); // Define com Enum
+                    Artefato aprovado = artefatoRepository.save(artefato);
+                    return ResponseEntity.ok(aprovado);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }

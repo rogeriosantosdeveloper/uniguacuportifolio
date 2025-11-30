@@ -19,11 +19,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body className={`${inter.className} bg-gray-100 text-gray-800`}>
+      <body className={`${inter.className} bg-gray-50 text-gray-800 antialiased`}>
         <AuthProvider>
-          <div className="flex min-h-screen flex-col">
+          {/* Este div é o container principal.
+            - flex e flex-col: Organiza os filhos verticalmente.
+            - min-h-screen: Garante que o container tenha pelo menos a altura da tela.
+          */}
+          <div className="flex flex-col min-h-screen">
             <Header />
-            <main className="flex-grow">{children}</main>
+            
+            {/* Conteúdo principal com flex-1 para empurrar o footer para baixo */}
+            <main className="flex-1">
+              {children}
+            </main>
+            
             <Footer />
           </div>
         </AuthProvider>

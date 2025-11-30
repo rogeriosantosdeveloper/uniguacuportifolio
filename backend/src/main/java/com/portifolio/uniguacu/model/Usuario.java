@@ -23,15 +23,13 @@ public class Usuario {
     private String password;
 
     private String fotoUrl;
-
     private String curso;
-
     private String turno;
 
+    // NOVO CAMPO ROLE
+    @Column(nullable = false)
+    private String role = "ROLE_USER"; // Valor padrão para novos usuários
+
     private String passwordResetToken;
-
-    private String role;
-
     private LocalDateTime passwordResetTokenExpiry;
-
 }

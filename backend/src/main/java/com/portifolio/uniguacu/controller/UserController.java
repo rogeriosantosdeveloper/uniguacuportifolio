@@ -87,6 +87,7 @@ public class UserController {
         dto.setFotoUrl(usuario.getFotoUrl());
         dto.setCurso(usuario.getCurso());
         dto.setTurno(usuario.getTurno());
+        dto.setRole(usuario.getRole());
         return dto;
     }
 }

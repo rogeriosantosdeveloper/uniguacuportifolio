@@ -10,4 +10,5 @@ public class UsuarioDTO {
     private String fotoUrl;
     private String curso;
     private String turno;
+    private String role;
 }
