@@ -17,7 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/files")
-@CrossOrigin(origins = "http://localhost:3000") // <-- GARANTA QUE ESTA LINHA ESTEJA AQUI
+// CORS é gerenciado globalmente pelo SecurityConfig
 public class FileController {
 
     @Autowired

@@ -44,10 +44,46 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Permite localhost para desenvolvimento e domínio do Vercel para produção
+        // Use variável de ambiente FRONTEND_URL ou padrão para localhost + Vercel
+        String frontendUrl = System.getenv("FRONTEND_URL");
+        java.util.List<String> allowedOrigins = new java.util.ArrayList<>();
+        
+        // Sempre permite localhost para desenvolvimento
+        allowedOrigins.add("http://localhost:3000");
+        
+        if (frontendUrl != null && !frontendUrl.isEmpty()) {
+            // Remove barras finais das URLs (o navegador envia origem sem barra)
+            frontendUrl = frontendUrl.trim();
+            if (frontendUrl.endsWith("/")) {
+                frontendUrl = frontendUrl.substring(0, frontendUrl.length() - 1);
+            }
+            
+            // Se tiver múltiplas URLs separadas por vírgula
+            if (frontendUrl.contains(",")) {
+                String[] urls = frontendUrl.split(",");
+                for (String url : urls) {
+                    String cleanUrl = url.trim();
+                    if (cleanUrl.endsWith("/")) {
+                        cleanUrl = cleanUrl.substring(0, cleanUrl.length() - 1);
+                    }
+                    if (!cleanUrl.isEmpty()) {
+                        allowedOrigins.add(cleanUrl);
+                    }
+                }
+            } else {
+                allowedOrigins.add(frontendUrl);
+            }
+        }
+        
+        // Em produção, permite qualquer domínio do Vercel (você pode restringir depois)
+        // Para isso, adicione a variável FRONTEND_URL no Render com seu domínio exato
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L); // Cache preflight por 1 hora
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
@@ -60,6 +96,8 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
+                        // Permite requisições OPTIONS (preflight CORS) antes de tudo
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // --- Endpoints Públicos ---
                         .requestMatchers("/api/auth/**").permitAll() // Login/Registro
                         .requestMatchers(HttpMethod.GET, "/api/artefatos").permitAll() // Listar artefatos APROVADOS
