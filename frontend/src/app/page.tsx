@@ -30,12 +30,11 @@ type FilterState = {
 };
 
 const fetcher = (url: string) => {
-  // NOTA: O token não é necessário aqui, pois a busca de artefatos é pública.
-  // Deixei seu código, mas idealmente o token só é enviado em requisições protegidas.
-  const token = localStorage.getItem('token');
+  // Verifica se está no cliente antes de acessar localStorage
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   return fetch(url, {
     headers: {
-      'Authorization': `Bearer ${token}`
+      ...(token && { 'Authorization': `Bearer ${token}` })
     }
   }).then(res => {
     if (!res.ok) {
@@ -264,3 +263,4 @@ export default function Home() {
     </>
   );
 }
+
