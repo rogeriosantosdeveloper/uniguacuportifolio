@@ -7,6 +7,7 @@ import { useAuth } from '@/context/AuthContext'; // Hook para autenticação
 import useSWR, { mutate } from 'swr'; // Importando SWR e mutate
 import { ComentariosSection } from '@/components/ComentariosSection'; // Importa a nova seção
 import { StarRating } from '@/components/StarRating'; // Importar se for usar diretamente aqui
+import { getApiEndpoint, getFileUrl } from '@/lib/api';
 
 // Tipo para o objeto Artefato
 type Artefato = {
@@ -66,8 +67,9 @@ export default function ArtefatoDetalhePage() {
 
   // Busca os dados do artefato usando SWR
   // O SWR lida com loading, error e data automaticamente
+  const artefatoUrl = id ? getApiEndpoint(`/api/artefatos/${id}`) : null;
   const { data: artefato, error, isLoading, mutate: mutateArtefato } = useSWR<Artefato>(
-      id ? `http://localhost:8080/api/artefatos/${id}` : null,
+      artefatoUrl,
       fetcher
   );
 
@@ -82,7 +84,7 @@ export default function ArtefatoDetalhePage() {
       if (window.confirm('Tem certeza que deseja deletar este projeto? Esta ação não pode ser desfeita.')) {
           setActionError(null);
           try {
-              const response = await fetch(`http://localhost:8080/api/artefatos/${id}`, {
+              const response = await fetch(getApiEndpoint(`/api/artefatos/${id}`), {
                   method: 'DELETE',
                   headers: { 'Authorization': `Bearer ${token}` }
               });
@@ -92,7 +94,8 @@ export default function ArtefatoDetalhePage() {
               }
 
               // Invalida cache da lista principal e redireciona
-              mutate((key) => typeof key === 'string' && key.startsWith('http://localhost:8080/api/artefatos'));
+              const apiUrl = getApiEndpoint('/api/artefatos');
+              mutate((key) => typeof key === 'string' && key.startsWith(apiUrl));
               router.push('/');
 
           } catch (err) {
@@ -111,7 +114,7 @@ export default function ArtefatoDetalhePage() {
       }
 
       try {
-          const response = await fetch(`http://localhost:8080/api/artefatos/${artefato.id}/aprovar`, {
+          const response = await fetch(getApiEndpoint(`/api/artefatos/${artefato.id}/aprovar`), {
               method: 'PUT',
               headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -124,7 +127,8 @@ export default function ArtefatoDetalhePage() {
           mutateArtefato({ ...artefato, status: 'APROVADO' }, false);
 
           // Invalida o cache da lista principal para a home atualizar
-          mutate((key) => typeof key === 'string' && key.startsWith('http://localhost:8080/api/artefatos'));
+          const apiUrl = getApiEndpoint('/api/artefatos');
+          mutate((key) => typeof key === 'string' && key.startsWith(apiUrl));
           alert('Projeto aprovado com sucesso!');
 
       } catch (err) {
@@ -167,7 +171,7 @@ export default function ArtefatoDetalhePage() {
   // Debug: log do estado selectedImage e dados do artefato
   console.log('selectedImage state:', selectedImage);
   console.log('artefato.urlImagemPrincipal:', artefato?.urlImagemPrincipal);
-  console.log('URL completa da imagem:', artefato?.urlImagemPrincipal ? `http://localhost:8080/api/files/${artefato.urlImagemPrincipal}` : 'N/A');
+  console.log('URL completa da imagem:', getFileUrl(artefato?.urlImagemPrincipal) || 'N/A');
 
   // Lógica para determinar se os botões de Edição/Deleção devem aparecer
   // APENAS ADMIN pode editar/deletar projetos (seja qual for o status).
@@ -181,7 +185,7 @@ export default function ArtefatoDetalhePage() {
         {artefato.urlImagemPrincipal ? (
           <>
             <img
-              src={`http://localhost:8080/api/files/${artefato.urlImagemPrincipal}`}
+              src={getFileUrl(artefato.urlImagemPrincipal) || ''}
               alt={`Imagem do projeto ${artefato.titulo}`}
               className="w-full h-full object-cover"
               onError={(e) => {
@@ -380,12 +384,12 @@ export default function ArtefatoDetalhePage() {
                                     className="relative group cursor-pointer bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden"
                                     onClick={() => {
                                         console.log('Clique na imagem:', imagem);
-                                        setSelectedImage(`http://localhost:8080/api/files/${imagem}`);
+                                        setSelectedImage(getFileUrl(imagem) || '');
                                     }}
                                 >
                                     <div className="aspect-square overflow-hidden">
                                         <img
-                                            src={`http://localhost:8080/api/files/${imagem}`}
+                                            src={getFileUrl(imagem) || ''}
                                             alt={`Imagem ${index + 1} do projeto`}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         />
@@ -451,7 +455,7 @@ export default function ArtefatoDetalhePage() {
                                     <span className="text-gray-700 font-medium">{doc.nome}</span>
                                 </div>
                                 <a
-                                    href={`http://localhost:8080/api/files/${doc.url}`}
+                                    href={getFileUrl(doc.url) || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-3 py-1 bg-uniguacu-blue text-white text-sm rounded hover:bg-opacity-80 transition-colors"

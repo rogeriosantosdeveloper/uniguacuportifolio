@@ -4,6 +4,7 @@ import { useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useAuth } from '@/context/AuthContext';
 import { StarRating } from './StarRating'; // Importa o componente de estrelas
+import { getApiEndpoint } from '@/lib/api';
 
 interface ComentarioDTO {
     id: number;
@@ -28,7 +29,7 @@ const fetcher = (url: string) => fetch(url).then(res => {
 
 export function ComentariosSection({ artefatoId }: ComentariosSectionProps) {
     const { token, user } = useAuth(); // Pega o usuário logado para preencher o nome
-    const comentariosUrl = `http://localhost:8080/api/artefatos/${artefatoId}/comentarios`;
+    const comentariosUrl = getApiEndpoint(`/api/artefatos/${artefatoId}/comentarios`);
 
     const { data: comentarios, error, isLoading } = useSWR<ComentarioDTO[]>(comentariosUrl, fetcher);
 

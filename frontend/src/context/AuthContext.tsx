@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { getApiEndpoint } from '@/lib/api';
 
 // Define o formato do objeto User, incluindo a role
 interface User {
@@ -46,9 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchAndSetUser = async (currentToken: string) => {
      setLoadingUser(true); // Começa a carregar
      try {
-         const response = await fetch('http://localhost:8080/api/users/me', {
-             headers: { 'Authorization': `Bearer ${currentToken}` }
-         });
+        const response = await fetch(getApiEndpoint('/api/users/me'), {
+            headers: { 'Authorization': `Bearer ${currentToken}` }
+        });
          // Lança erro se a resposta não for OK (ex: token inválido/expirado)
          if (!response.ok) {
             const errorBody = await response.text(); // Tenta ler corpo do erro

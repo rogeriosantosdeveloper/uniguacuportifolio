@@ -4,6 +4,7 @@ import { useState } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import { getApiEndpoint } from '@/lib/api';
 
 // Definimos o tipo de dado para o artefato
 type Artefato = {
@@ -75,8 +76,9 @@ export default function AdminPage() {
   }
   
   // Usamos SWR para buscar os projetos do endpoint de pendentes
+  const pendentesUrl = token ? getApiEndpoint('/api/artefatos/pendentes') : null;
   const { data: pendentes, error, isLoading } = useSWR<Artefato[]>(
-    token ? 'http://localhost:8080/api/artefatos/pendentes' : null, // Só busca se o token existir
+    pendentesUrl, // Só busca se o token existir
     (url: string) => fetcher(url, token)
   );
 
@@ -85,23 +87,23 @@ export default function AdminPage() {
   // Função para aprovar um projeto
   const handleApprove = async (id: number) => {
     setIsSubmitting(true);
-    await fetch(`http://localhost:8080/api/artefatos/${id}/aprovar`, {
+    await fetch(getApiEndpoint(`/api/artefatos/${id}/aprovar`), {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
     });
     // Avisa ao SWR para recarregar a lista de projetos pendentes
-    mutate('http://localhost:8080/api/artefatos/pendentes');
+    if (pendentesUrl) mutate(pendentesUrl);
     setIsSubmitting(false);
   };
 
   // Função para reprovar um projeto
   const handleReject = async (id: number) => {
     setIsSubmitting(true);
-    await fetch(`http://localhost:8080/api/artefatos/${id}/reprovar`, {
+    await fetch(getApiEndpoint(`/api/artefatos/${id}/reprovar`), {
       method: 'PUT',
       headers: { 'Authorization': `Bearer ${token}` },
     });
-    mutate('http://localhost:8080/api/artefatos/pendentes');
+    if (pendentesUrl) mutate(pendentesUrl);
     setIsSubmitting(false);
   };
 

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext'; // Hook para autenticação
+import { getApiEndpoint } from '@/lib/api';
 
 type ArtefatoFormData = {
   titulo: string;
@@ -30,7 +31,7 @@ export default function EditarArtefatoPage() {
   // Busca os dados atuais para preencher o formulário
   useEffect(() => {
     if (id) {
-      fetch(`http://localhost:8080/api/artefatos/${id}`)
+      fetch(getApiEndpoint(`/api/artefatos/${id}`))
         .then(res => {
           if (!res.ok) throw new Error('Projeto não encontrado');
           return res.json();
@@ -58,7 +59,7 @@ export default function EditarArtefatoPage() {
     if (!formData) return;
 
     try {
-      const response = await fetch(`http://localhost:8080/api/artefatos/${id}`, {
+      const response = await fetch(getApiEndpoint(`/api/artefatos/${id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

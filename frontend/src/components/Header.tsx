@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { getFileUrl } from '@/lib/api';
 
 export function Header() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -73,7 +74,7 @@ export function Header() {
                       <div className="w-full h-full rounded-full bg-white flex items-center justify-center relative overflow-hidden">
                         {user.fotoUrl ? (
                           <Image
-                            src={`http://localhost:8080/api/files/${user.fotoUrl}`}
+                            src={getFileUrl(user.fotoUrl) || ''}
                             alt={`Foto de ${user.nomeCompleto}`}
                             layout="fill"
                             objectFit="cover"

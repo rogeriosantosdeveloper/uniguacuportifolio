@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { SearchAndFilter } from '@/components/SearchAndFilter';
 import { Tabs } from '@/components/Tabs';
 import { AlunoList } from '@/components/AlunoList';
+import { getApiEndpoint, getFileUrl } from '@/lib/api';
 
 
 type Artefato = {
@@ -69,7 +70,7 @@ export default function Home() {
     data: artefatos,
     error,
     isLoading
-  } = useSWR<Artefato[]>(`http://localhost:8080/api/artefatos?${params.toString()}`, fetcher);
+  } = useSWR<Artefato[]>(getApiEndpoint(`/api/artefatos?${params.toString()}`), fetcher);
 
   const handleSearch = () => {
     // A lógica de revalidação já é cuidada pelo SWR quando `params` muda
@@ -194,7 +195,7 @@ export default function Home() {
                           {artefato.urlImagemPrincipal ? (
                             <>
                               <img
-                                src={`http://localhost:8080/api/files/${artefato.urlImagemPrincipal}`}
+                                src={getFileUrl(artefato.urlImagemPrincipal) || ''}
                                 alt={artefato.titulo}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                               />

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getApiEndpoint } from '@/lib/api';
 
 const cursosDisponiveis = [
   "Administração",
@@ -69,7 +70,7 @@ export default function CadastroPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8080/api/auth/register", {
+      const response = await fetch(getApiEndpoint("/api/auth/register"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         // Envia apenas os dados que o backend espera

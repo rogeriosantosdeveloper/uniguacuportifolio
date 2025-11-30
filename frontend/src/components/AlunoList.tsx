@@ -2,6 +2,7 @@
 
 import useSWR from 'swr';
 import Image from 'next/image';
+import { getApiEndpoint, getFileUrl } from '@/lib/api';
 
 type Aluno = {
   id: number;
@@ -21,7 +22,7 @@ const fetcher = async (url: string) => {
 };
 
 export const AlunoList = () => {
-  const { data: alunos, error, isLoading } = useSWR<Aluno[]>('http://localhost:8080/api/users/alunos', fetcher);
+  const { data: alunos, error, isLoading } = useSWR<Aluno[]>(getApiEndpoint('/api/users/alunos'), fetcher);
 
   if (isLoading) {
     return <p className="text-center py-10">Carregando alunos...</p>;
@@ -44,7 +45,7 @@ export const AlunoList = () => {
             {aluno.fotoUrl ? (
               // Se tiver foto, mostra a imagem
               <Image
-                src={`http://localhost:8080/api/files/${aluno.fotoUrl}`}
+                src={getFileUrl(aluno.fotoUrl) || ''}
                 alt={`Foto de ${aluno.nomeCompleto}`}
                 layout="fill"
                 objectFit="cover"

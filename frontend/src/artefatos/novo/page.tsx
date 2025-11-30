@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import useSWR, { mutate } from 'swr';
+import { getApiEndpoint } from '@/lib/api';
 
 // --- Tipos e Constantes ---
 type UsuarioDTO = {
@@ -39,7 +40,7 @@ async function uploadFile(file: File, token: string | null): Promise<string> {
     const fileFormData = new FormData();
     fileFormData.append('file', file);
     
-    const response = await fetch('http://localhost:8080/api/files/upload', {
+    const response = await fetch(getApiEndpoint('/api/files/upload'), {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` },
         body: fileFormData,
@@ -83,8 +84,9 @@ export default function NovoArtefato() {
     const [formError, setFormError] = useState<string | null>(null);
 
     // Busca a lista de usuários para o select de coautores
+    const usuariosUrl = token ? getApiEndpoint('/api/users') : null;
     const { data: usuarios, error: usuariosError } = useSWR<UsuarioDTO[]>(
-        token ? ['http://localhost:8080/api/users', token] : null,
+        usuariosUrl ? [usuariosUrl, token] : null,
         ([url, tokenValue]) => fetcher(url, tokenValue as string | null)
     );
 
@@ -194,7 +196,7 @@ export default function NovoArtefato() {
             };
 
             // --- Envio do Artefato para o Backend ---
-            const createResponse = await fetch('http://localhost:8080/api/artefatos', {
+            const createResponse = await fetch(getApiEndpoint('/api/artefatos'), {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -209,7 +211,8 @@ export default function NovoArtefato() {
 
             // --- Sucesso ---
             // Invalida o cache da SWR para a home page buscar os dados atualizados
-            mutate((key) => typeof key === 'string' && key.startsWith('http://localhost:8080/api/artefatos'));
+            const apiUrl = getApiEndpoint('/api/artefatos');
+            mutate((key) => typeof key === 'string' && key.startsWith(apiUrl));
             router.push('/'); // Navega de volta para a home
 
         } catch (err: unknown) {

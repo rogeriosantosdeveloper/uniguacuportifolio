@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { getApiEndpoint, getFileUrl } from '@/lib/api';
 
 // Para o formulário, criamos uma lista de opções que podem ser reutilizadas
 const cursosDisponiveis = [
@@ -54,7 +55,7 @@ export default function PerfilPage() {
       setTurno(user.turno || "");
       // CORREÇÃO: Define a imagem de preview apenas se ela existir.
       setPreviewImage(
-        user.fotoUrl ? `http://localhost:8080/api/files/${user.fotoUrl}` : null
+        getFileUrl(user.fotoUrl)
       );
     }
   }, [user]); // Este efeito roda sempre que o objeto 'user' do contexto mudar
@@ -82,7 +83,7 @@ export default function PerfilPage() {
         fileFormData.append("file", selectedFile);
 
         const photoResponse = await fetch(
-          "http://localhost:8080/api/users/me/photo",
+          getApiEndpoint("/api/users/me/photo"),
           {
             method: "POST",
             headers: { Authorization: `Bearer ${token}` },
@@ -96,7 +97,7 @@ export default function PerfilPage() {
       }
 
       // Passo 2: Atualiza os outros dados do usuário
-      const dataResponse = await fetch("http://localhost:8080/api/users/me", {
+      const dataResponse = await fetch(getApiEndpoint("/api/users/me"), {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
